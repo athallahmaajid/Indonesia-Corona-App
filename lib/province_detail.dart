@@ -1,0 +1,89 @@
+import 'package:flutter/material.dart';
+
+class ProvinceDetail extends StatelessWidget {
+  final provinceMap;
+  const ProvinceDetail({Key? key, this.provinceMap}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("${provinceMap["Provinsi"]}"),),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height/10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("${provinceMap['Kasus_Posi']}", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold))
+              ],
+            ),
+            SizedBox(height: MediaQuery.of(context).size.height/30,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Total Kasus Covid 19 di ${provinceMap['Provinsi']}", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 128, 0, 0)))
+              ],
+            ),
+            SizedBox(height: 60,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  width: 160,
+                  height: 90,
+                  padding: EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                      color: Color.fromARGB(221, 204, 255, 170),
+                      borderRadius: BorderRadius.circular(5)
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text("Sembuh", style: TextStyle(color: Color.fromARGB(255, 0, 128, 0), fontSize: 15))
+                        ],
+                      ),
+                      SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text("${provinceMap['Kasus_Semb']}", style: TextStyle(color: Color.fromARGB(255, 0, 128, 0), fontSize: 22))
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 150,
+                  height: 90,
+                  padding: EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                      color: Color.fromARGB(221, 255, 170, 170),
+                      borderRadius: BorderRadius.circular(5)
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text("Meninggal", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0)),)
+                        ],
+                      ),
+                      SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text("${provinceMap['Kasus_Meni']}", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0), fontSize: 22),)
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
