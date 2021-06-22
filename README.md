@@ -4,13 +4,25 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Clone this project
+```
+git clone https://github.com/athallahmaajid/Indonesia-Corona-App.git
+```
+### Development
+  run in your emulator or connect your pc to your phone
+  ```
+  flutter run
+  ```
 
-A few resources to get you started if this is your first Flutter project:
+### Release
+  build APK
+  ```
+  flutter build apk --release
+  ```
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+  build IOS app (MacOS Only)
+  ```
+  flutter build ipa --release
+  ```
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+  Download the app in your phone, and install it
