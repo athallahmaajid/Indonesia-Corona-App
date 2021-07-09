@@ -4,6 +4,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:corona_app/main.dart';
 import 'package:corona_app/province_detail.dart';
+import 'package:corona_app/my_icon_icons.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:corona_app/data.dart';
+import 'package:corona_app/country_detail.dart';
+import 'package:corona_app/filter.dart';
 
 class LoadingWidget extends StatelessWidget {
   const LoadingWidget({Key? key}) : super(key: key);
@@ -15,10 +21,23 @@ class LoadingWidget extends StatelessWidget {
         SpinKitThreeBounce(
           color: Colors.blue,
           size: 50.0,
+
         )
     );
   }
 }
+
+class ErrorHandler extends StatelessWidget {
+  const ErrorHandler({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text("Error", style: TextStyle(color: Colors.red),)
+    );
+  }
+}
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -28,207 +47,388 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  var _isLoading = true;
   var corona;
-  var provinceMap = {'DKI Jakarta': 0,
-    'Jawa Barat': 1,
-    'Jawa Tengah': 2,
-    'Jawa Timur': 3,
-    'Kalimantan Timur': 4,
-    'Sulawesi Selatan': 5,
-    'Banten': 6,
-    'Bali': 7,
-    'Riau': 8,
-    'Daerah Istimewa Yogyakarta': 9,
-    'Sumatera Barat': 10,
-    'Kalimantan Selatan': 11,
-    'Sumatera Utara': 12,
-    'Papua': 13,
-    'Sumatera Selatan': 14,
-    'Kalimantan Tengah': 15,
-    'Sulawesi Utara': 16,
-    'Nusa Tenggara Timur': 17,
-    'Bangka Belitung': 18,
-    'Sulawesi Tengah': 19,
-    'Kalimantan Utara': 20,
-    'Lampung': 21,
-    'Aceh': 22,
-    'Sulawesi Tenggara': 23,
-    'Nusa Tenggara Barat': 24,
-    'Kepulauan Riau': 25,
-    'Papua Barat': 26,
-    'Maluku': 27,
-    'Kalimantan Barat': 28,
-    'Jambi': 29,
-    'Bengkulu': 30,
-    'Sulawesi Barat': 31,
-    'Gorontalo': 32,
-    'Maluku Utara': 33};
+  int _selectedIndex = 0;
+  PageController _pageController = PageController();
+  var globalData;
+
   var provinceData;
 
   Future<void> _loadIndonesiaData() async{
-    corona = await connectToAPI();
-    setState(() {
-      _isLoading = false;
-    });
+    if (corona == null) {
+      corona = await http.get(Uri.parse('https://apicovid19indonesia-v2.vercel.app/api/indonesia/'));
+      corona = json.decode(corona.body);
+      corona = corona as Map<String, dynamic>;
+      _loadProvinceData();
+    }
+  }
+  Future<void> _reloadIndonesiaData() async {
+    corona = await http.get(Uri.parse('https://apicovid19indonesia-v2.vercel.app/api/indonesia/'));
+    corona = json.decode(corona.body);
+    corona = corona as Map<String, dynamic>;
     _loadProvinceData();
   }
 
   @override
   void initState() {
-    _loadIndonesiaData();
     super.initState();
+    _pageController = PageController();
   }
 
-  Future<void> _loadProvinceData() async{
-    provinceData = await connectToAPI(province: true);
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
-
+  Future<void> _loadProvinceData() async {
+    provinceData = await http.get(Uri.parse(
+        'https://apicovid19indonesia-v2.vercel.app/api/indonesia/provinsi'));
+    provinceData = json.decode(provinceData.body);
+  }
+  Future<void> _loadGlobalData() async {
+    if (globalData == null) {
+      globalData = await http.get(Uri.parse("https://covid19.mathdro.id/api"));
+      globalData = json.decode(globalData.body);
+    }
+  }
+  Future<void> _reloadGlobalData() async {
+    globalData = await http.get(Uri.parse("https://covid19.mathdro.id/api"));
+    globalData = json.decode(globalData.body);
+  }
+  // TODO 1 : bikin global covid
+  // TODO 2 : bikin daftar rumah sakit
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: (_isLoading) ? LoadingWidget() :
-        RefreshIndicator(
-          onRefresh: _loadIndonesiaData,
-          child: SingleChildScrollView(
-            child: Column(
+        child:
+            PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() => _selectedIndex);
+              },
               children: [
-                SizedBox(height: MediaQuery.of(context).size.height/10,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("${corona['positif']}", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold))
-                  ],
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height/30,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Total Kasus Covid 19 di Indonesia", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 128, 0, 0)))
-                  ],
-                ),
-                SizedBox(height: 60,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      width: 160,
-                      height: 90,
-                      padding: EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(221, 204, 255, 170),
-                          borderRadius: BorderRadius.circular(5)
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
+                FutureBuilder(
+                  future: _loadIndonesiaData(),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    Widget child;
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      child = RefreshIndicator(
+                        onRefresh: _reloadIndonesiaData,
+                        child: SingleChildScrollView(
+                          child: Column(
                             children: [
-                              Text("Sembuh", style: TextStyle(color: Color.fromARGB(255, 0, 128, 0), fontSize: 15))
+                              SizedBox(height: MediaQuery.of(context).size.height/10,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("${filterNumber(corona['positif'])}", style: TextStyle(fontSize: 40,
+                                      fontWeight: FontWeight.bold))
+                                ],
+                              ),
+                              SizedBox(height: MediaQuery.of(context).size.height/30,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("Total Kasus Covid 19 di Indonesia", style: TextStyle(
+                                      fontSize: 17, fontWeight: FontWeight.bold,
+                                      color: Color.fromARGB(255, 128, 0, 0)))
+                                ],
+                              ),
+                              SizedBox(height: 60,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Container(
+                                    width: 160,
+                                    height: 90,
+                                    padding: EdgeInsets.all(8.0),
+                                    decoration: BoxDecoration(
+                                        color: Color.fromARGB(221, 204, 255, 170),
+                                        borderRadius: BorderRadius.circular(5)
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text("Sembuh", style: TextStyle(
+                                                color: Color.fromARGB(255, 0, 128, 0),
+                                                fontSize: 15))
+                                          ],
+                                        ),
+                                        SizedBox(height: 30),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Text("${filterNumber(corona['sembuh'])}", style: TextStyle(color: Color.fromARGB(255, 0, 128, 0), fontSize: 22))
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 150,
+                                    height: 90,
+                                    padding: EdgeInsets.all(8.0),
+                                    decoration: BoxDecoration(
+                                        color: Color.fromARGB(221, 255, 170, 170),
+                                        borderRadius: BorderRadius.circular(5)
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text("Meninggal", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0)),)
+                                          ],
+                                        ),
+                                        SizedBox(height: 30),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Text("${filterNumber(corona['meninggal'])}", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0), fontSize: 22),)
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                              SizedBox(height: 15),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 150,
+                                    height: 90,
+                                    padding: EdgeInsets.all(8.0),
+                                    decoration: BoxDecoration(
+                                        color: Color.fromARGB(143, 175, 233, 221),
+                                        borderRadius: BorderRadius.circular(5)
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text("Dirawat", style: TextStyle(color: Color.fromARGB(255, 0, 68, 85)),)
+                                          ],
+                                        ),
+                                        SizedBox(height: 30),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Text("${filterNumber(corona['dirawat'])}", style: TextStyle(color: Color.fromARGB(255, 0, 68, 85), fontSize: 22),)
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 50,),
+                              ListView.builder(
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                physics: ClampingScrollPhysics(),
+                                itemCount: provinceMap.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  String key = provinceMap.keys.elementAt(index);
+                                  if (index % 2 == 0){
+                                    return GestureDetector(
+                                      child: ListTile(
+                                        contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                        title: Align(
+                                            alignment: Alignment(0, -1.2),
+                                            child: Text("$key", style: TextStyle(color: Colors.black))),
+                                      ),
+                                      onTap: (){
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => ProvinceDetail(provinceMap: provinceData[index],)));
+                                      },
+                                    );
+                                  } else {
+                                    return ListTile(
+                                      contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                      title: Align(
+                                          alignment: Alignment(0, -1.2),
+                                          child: Text("$key")
+                                      ),
+                                      tileColor: Colors.black12,
+                                      onTap: (){
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => ProvinceDetail(provinceMap: provinceData[index],)));
+                                      },
+                                    );
+                                  }
+                                },
+                              ),
                             ],
                           ),
-                          SizedBox(height: 30),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text("${corona['sembuh']}", style: TextStyle(color: Color.fromARGB(255, 0, 128, 0), fontSize: 22))
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: 150,
-                      height: 90,
-                      padding: EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(221, 255, 170, 170),
-                          borderRadius: BorderRadius.circular(5)
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Text("Meninggal", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0)),)
-                            ],
-                          ),
-                          SizedBox(height: 30),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text("${corona['meninggal']}", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0), fontSize: 22),)
-                            ],
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 150,
-                      height: 90,
-                      padding: EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(143, 175, 233, 221),
-                          borderRadius: BorderRadius.circular(5)
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Text("Dirawat", style: TextStyle(color: Color.fromARGB(255, 0, 68, 85)),)
-                            ],
-                          ),
-                          SizedBox(height: 30),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text("${corona['dirawat']}", style: TextStyle(color: Color.fromARGB(255, 0, 68, 85), fontSize: 22),)
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 50,),
-                ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  physics: ClampingScrollPhysics(),
-                  itemCount: provinceMap.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    String key = provinceMap.keys.elementAt(index);
-                    if (index % 2 == 0){
-                      return GestureDetector(
-                        child: ListTile(
-                          title: Text("$key", style: TextStyle(color: Colors.black)),
                         ),
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => ProvinceDetail(provinceMap: provinceData[index]['attributes'],)));
-                        },
                       );
+                    } else if (snapshot.connectionState == ConnectionState.waiting) {
+                      child = LoadingWidget();
                     } else {
-                      return ListTile(
-                        title: Text("$key", style: TextStyle(color: Colors.black),),
-                        tileColor: Colors.black12,
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => ProvinceDetail(provinceMap: provinceData[index]['attributes'],)));
-                        },
-                      );
+                      child = ErrorHandler();
                     }
-                  },
+                    return child;
+                  }
+              ),
+                FutureBuilder(
+                    future: _loadGlobalData(),
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      Widget child;
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        child = RefreshIndicator(
+                          onRefresh: _reloadGlobalData,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                SizedBox(height: MediaQuery.of(context).size.height/10,),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("${globalData['confirmed']['value']}", style: TextStyle(fontSize: 40,
+                                        fontWeight: FontWeight.bold))
+                                  ],
+                                ),
+                                SizedBox(height: MediaQuery.of(context).size.height/30,),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Total Kasus Covid 19 di Dunia", style: TextStyle(
+                                        fontSize: 17, fontWeight: FontWeight.bold,
+                                        color: Color.fromARGB(255, 128, 0, 0)))
+                                  ],
+                                ),
+                                SizedBox(height: 60,),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Container(
+                                      width: 160,
+                                      height: 90,
+                                      padding: EdgeInsets.all(8.0),
+                                      decoration: BoxDecoration(
+                                          color: Color.fromARGB(221, 204, 255, 170),
+                                          borderRadius: BorderRadius.circular(5)
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text("Sembuh", style: TextStyle(
+                                                  color: Color.fromARGB(255, 0, 128, 0),
+                                                  fontSize: 15))
+                                            ],
+                                          ),
+                                          SizedBox(height: 30),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              Text("${globalData['recovered']['value']}", style: TextStyle(color: Color.fromARGB(255, 0, 128, 0), fontSize: 22))
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 150,
+                                      height: 90,
+                                      padding: EdgeInsets.all(8.0),
+                                      decoration: BoxDecoration(
+                                          color: Color.fromARGB(221, 255, 170, 170),
+                                          borderRadius: BorderRadius.circular(5)
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text("Meninggal", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0)),)
+                                            ],
+                                          ),
+                                          SizedBox(height: 30),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              Text("${globalData['deaths']['value']}", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0), fontSize: 22),)
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: 15),
+                                ListView.builder(
+                                  scrollDirection: Axis.vertical,
+                                  shrinkWrap: true,
+                                  physics: ClampingScrollPhysics(),
+                                  itemCount: countries.length,
+                                  itemBuilder: (BuildContext context, int index) {
+                                    if (index % 2 == 0){
+                                      return GestureDetector(
+                                        child: ListTile(
+                                          contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                          title: Align(
+                                              alignment: Alignment(0, -1.2),
+                                              child: Text("${countries[index]}", style: TextStyle(color: Colors.black))),
+                                        ),
+                                        onTap: (){
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => CountryDetail(country: countries[index],)));
+                                        },
+                                      );
+                                    } else {
+                                      return ListTile(
+                                        contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                        title: Align(
+                                            alignment: Alignment(0, -1.2),
+                                            child: Text("${countries[index]}")
+                                        ),
+                                        tileColor: Colors.black12,
+                                        onTap: (){
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => CountryDetail(country: countries[index],)));
+                                        },
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      } else if (snapshot.connectionState == ConnectionState.waiting) {
+                        child = LoadingWidget();
+                      } else {
+                        child = Text("$snapshot");
+                      }
+                      return child;
+                    }
                 ),
-              ],
-            ),
-          ),
-        ),
+              ]
+            )
+        // (_isLoading) ? LoadingWidget() :
+
       ),
-      // bottomNavigationBar: ,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex, // this will be set when a new tab is tapped
+        onTap: _onItemTapped,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.location_on),
+            label: 'Indonesia',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(MyIcon.globe),
+            label: "Global",
+          ),
+        ],
+      ),
     );
+  }
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      // using this page controller you can make beautiful animation effects
+      _pageController.animateToPage(index,
+          duration: Duration(milliseconds: 500), curve: Curves.easeOut);
+    });
   }
 }

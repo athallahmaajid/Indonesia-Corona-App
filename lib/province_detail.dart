@@ -7,7 +7,7 @@ class ProvinceDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("${provinceMap["Provinsi"]}"),),
+      appBar: AppBar(title: Text("${provinceMap["provinsi"]}"),),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -15,14 +15,14 @@ class ProvinceDetail extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("${provinceMap['Kasus_Posi']}", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold))
+                Text("${provinceMap['kasus']}", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),)
               ],
             ),
             SizedBox(height: MediaQuery.of(context).size.height/30,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Total Kasus Covid 19 di ${provinceMap['Provinsi']}", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 128, 0, 0)))
+                Flexible(child: Text("Total Kasus Covid 19 di ${provinceMap['provinsi']}", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 128, 0, 0)), overflow: TextOverflow.ellipsis))
               ],
             ),
             SizedBox(height: 60,),
@@ -48,7 +48,7 @@ class ProvinceDetail extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text("${provinceMap['Kasus_Semb']}", style: TextStyle(color: Color.fromARGB(255, 0, 128, 0), fontSize: 22))
+                          Text("${provinceMap['sembuh']}", style: TextStyle(color: Color.fromARGB(255, 0, 128, 0), fontSize: 22))
                         ],
                       ),
                     ],
@@ -73,7 +73,7 @@ class ProvinceDetail extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text("${provinceMap['Kasus_Meni']}", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0), fontSize: 22),)
+                          Text("${provinceMap['meninggal']}", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0), fontSize: 22),)
                         ],
                       ),
                     ],
