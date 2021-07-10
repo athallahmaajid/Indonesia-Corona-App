@@ -4,7 +4,6 @@ String filterNumber(int number){
   var limiter = 0;
   var counter = 0;
   for (var i = 0; i < reversed.length; i++) {
-    print(reversed);
     if (limiter == 3){
       if (reversed.length < 6) {
         reversed.insert(i, ',');
