@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:corona_app/filter.dart';
 
 class ProvinceDetail extends StatelessWidget {
   final provinceMap;
@@ -15,7 +16,7 @@ class ProvinceDetail extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("${provinceMap['kasus']}", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),)
+                Text("${filterNumber(provinceMap['kasus'])}", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),)
               ],
             ),
             SizedBox(height: MediaQuery.of(context).size.height/30,),
@@ -48,7 +49,7 @@ class ProvinceDetail extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text("${provinceMap['sembuh']}", style: TextStyle(color: Color.fromARGB(255, 0, 128, 0), fontSize: 22))
+                          Text("${filterNumber(provinceMap['sembuh'])}", style: TextStyle(color: Color.fromARGB(255, 0, 128, 0), fontSize: 22))
                         ],
                       ),
                     ],
@@ -73,7 +74,7 @@ class ProvinceDetail extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text("${provinceMap['meninggal']}", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0), fontSize: 22),)
+                          Text("${filterNumber(provinceMap['meninggal'])}", style: TextStyle(color: Color.fromARGB(255, 212, 0, 0), fontSize: 22),)
                         ],
                       ),
                     ],
