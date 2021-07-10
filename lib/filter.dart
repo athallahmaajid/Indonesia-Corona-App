@@ -10,7 +10,7 @@ String filterNumber(int number){
         reversed.insert(i, ',');
         counter++;
         limiter = 0;
-      } else if (reversed.length-1 != counter) {
+      } else if (reversed.length-i != counter) {
         reversed.insert(i+counter, ',');
         counter++;
         limiter = 0;
